@@ -1,40 +1,77 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Live-Daten Tauchrevier Gasometer</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live-Daten | TauchRevierGasometer</title>
   <style>
     body {
-      font-family: sans-serif;
-      background-color: #f9f9f9;
-      padding: 1em;
-      margin: 0;
+      font-family: Arial, sans-serif;
+      padding: 1rem;
+      background: #f5f5f5;
+      color: #222;
     }
-    #gasometer-widget {
-      font-size: 1.2em;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      padding: 1em;
-      max-width: 420px;
-      background-color: #ffffff;
+    .widget {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .icon {
+      font-size: 1.4rem;
+      margin-right: 0.4rem;
+    }
+    .line {
+      margin: 0.4rem 0;
+    }
+    .small {
+      font-size: 0.9rem;
+      color: #555;
+    }
+    .debug {
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      background: #eee;
+      padding: 0.5rem;
+      border-radius: 8px;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div id="gasometer-widget">
-    ⏳ Lade aktuelle Werte...
+  <div class="widget" id="gasometer-widget">
+    ⏳ Live-Daten werden geladen ...
   </div>
 
   <script>
-    fetch("https://script.google.com/macros/s/AKfycbzfACXUH15nhXizGVQhY60WmFJXhGLl62yYMfh-R56qPWnyUx1zGa6KlDCVkD2_nAne-g/exec")
-      .then(response => response.text())
-      .then(html => {
-        document.getElementById("gasometer-widget").innerHTML = html;
+    const WIDGET_ID = "gasometer-widget";
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbzfACXUH15nhXizGVQhY60WmFJXhGLl62yYMfh-R56qPWnyUx1zGa6KlDCVkD2_nAne-g/exec";
+
+    fetch(SHEET_URL)
+      .then((r) => r.json())
+      .then((data) => {
+        const box = document.getElementById(WIDGET_ID);
+        if (!data || !data.now) {
+          box.innerHTML = "❌ Live-Daten konnten nicht geladen werden.";
+          return;
+        }
+
+        const lines = [
+          `<strong>📡 Live aus dem TauchRevierGasometer Duisburg</strong>`,
+          data.now.tempParsed ? `🌡️ Lufttemperatur auf der Plattform: ${data.now.tempParsed.toFixed(1)} °C` : ``,
+          data.now.feuchteRaw ? `💧 Luftfeuchtigkeit auf der Plattform: ${data.now.feuchteRaw} %` : ``,
+          data.now.wasserParsed ? `🌊 Wassertemperatur in 6,5 m Tiefe: ${data.now.wasserParsed.toFixed(1)} °C` : `🌊 Wassertemperatur in 6,5 m Tiefe: nicht verfügbar`,
+          `📅 Stand: ${data.now.tsFormatted}`,
+          `<br /><span class="small">📈 Jahres-Höchstwert: ${data.max} °C | 📉 Tiefstwert: ${data.min} °C</span>`
+        ];
+
+        box.innerHTML = `<div class="line">${lines.filter(Boolean).join("</div><div class='line'>")}</div>`;
       })
-      .catch(error => {
-        console.error("Fehler beim Laden:", error);
-        document.getElementById("gasometer-widget").innerText = "❌ Live-Daten konnten nicht geladen werden.";
+      .catch((err) => {
+        console.error("Fehler beim Laden:", err);
+        document.getElementById(WIDGET_ID).innerHTML = "❌ Live-Daten konnten nicht geladen werden.";
       });
   </script>
 </body>

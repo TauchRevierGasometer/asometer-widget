@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Live-Daten Tauchrevier Gasometer</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f9f9f9;
+      padding: 1em;
+      margin: 0;
+    }
+    #gasometer-widget {
+      font-size: 1.2em;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 1em;
+      max-width: 420px;
+      background-color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <div id="gasometer-widget">
+    ⏳ Lade aktuelle Werte...
+  </div>
+
+  <script>
+    fetch("https://script.google.com/macros/s/AKfycbzfACXUH15nhXizGVQhY60WmFJXhGLl62yYMfh-R56qPWnyUx1zGa6KlDCVkD2_nAne-g/exec")
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById("gasometer-widget").innerHTML = html;
+      })
+      .catch(error => {
+        console.error("Fehler beim Laden:", error);
+        document.getElementById("gasometer-widget").innerText = "❌ Live-Daten konnten nicht geladen werden.";
+      });
+  </script>
+</body>
+</html>
